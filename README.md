@@ -519,6 +519,11 @@ docker images | grep blogging-app
 #### Build Process Details
 
 **Stage 1: Maven Build Container**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```dockerfile
 FROM maven:3.8.1-openjdk-17
@@ -529,12 +534,23 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 ```
 
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
+
 - Resolves dependencies
 - Compiles Java code
 - Runs unit tests
 - Packages as JAR
 
 **Stage 2: Runtime Container**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```dockerfile
 FROM openjdk:17-slim
@@ -542,6 +558,12 @@ WORKDIR /app
 COPY --from=0 /app/target/blogging-app.jar .
 ENTRYPOINT ["java", "-jar", "blogging-app.jar"]
 ```
+
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 - Creates lightweight runtime image
 - No build tools (Maven, compiler) included
@@ -746,9 +768,15 @@ Cluster: blogging-app-cluster
 │   ├── Controller manager logs: Disabled
 │   └── Scheduler logs: Disabled
 └── VPC Configuration:
+<<<<<<< HEAD
   ├── VPC ID: vpc-xxxxxxxx
   ├── Subnets: subnet-1, subnet-2
   └── Security Groups: sg-xxxxxxxx
+=======
+    ├── VPC ID: vpc-xxxxxxxx
+    ├── Subnets: subnet-1, subnet-2
+    └── Security Groups: sg-xxxxxxxx
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
 ```
 
 #### Node Group Configuration
@@ -802,16 +830,26 @@ metadata:
   namespace: blogging-app
 
 spec:
+<<<<<<< HEAD
   replicas: 2 # Two pods for high availability
 
   selector:
     matchLabels:
       app: blogging-app
 
+=======
+  replicas: 2  # Two pods for high availability
+
+  selector:
+    matchLabels:
+      app: blogging-app
+
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
   template:
     metadata:
       labels:
         app: blogging-app
+<<<<<<< HEAD
 
     spec:
       containers:
@@ -858,6 +896,54 @@ spec:
             runAsUser: 1000
             allowPrivilegeEscalation: false
 
+=======
+
+    spec:
+      containers:
+      - name: blogging-app
+        image: $ECR_URL/blogging-app:latest
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+
+        # Health Check - Liveness (auto-restart if fails)
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        # Health Check - Readiness (traffic routing)
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+        # Resource limits
+        resources:
+          requests:
+            cpu: 250m           # Minimum CPU required
+            memory: 256Mi       # Minimum memory required
+          limits:
+            cpu: 500m           # Maximum CPU allowed
+            memory: 512Mi       # Maximum memory allowed
+
+        # Security context
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
       # Graceful shutdown
       terminationGracePeriodSeconds: 30
 
@@ -865,8 +951,13 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
+<<<<<<< HEAD
       maxSurge: 1 # Allow 1 extra pod during update
       maxUnavailable: 0 # Zero downtime
+=======
+      maxSurge: 1        # Allow 1 extra pod during update
+      maxUnavailable: 0  # Zero downtime
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
 ```
 
 #### LoadBalancer Service
@@ -882,6 +973,7 @@ metadata:
 
 spec:
   type: LoadBalancer
+<<<<<<< HEAD
 
   selector:
     app: blogging-app
@@ -896,6 +988,22 @@ spec:
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 10800 # 3 hours
+=======
+
+  selector:
+    app: blogging-app
+
+  ports:
+  - protocol: TCP
+    port: 80              # External port
+    targetPort: 8080      # Pod port
+    nodePort: 30xxx       # Auto-assigned
+
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
 ```
 
 #### Service Account
@@ -921,6 +1029,7 @@ spec:
   podSelector:
     matchLabels:
       app: blogging-app
+<<<<<<< HEAD
 
   policyTypes:
     - Ingress
@@ -948,6 +1057,35 @@ spec:
           port: 53 # DNS
         - protocol: TCP
           port: 443 # HTTPS
+=======
+
+  policyTypes:
+  - Ingress
+  - Egress
+
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: blogging-app
+    - podSelector:
+        matchLabels:
+          app: blogging-app
+    ports:
+    - protocol: TCP
+      port: 8080
+
+  egress:
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 53     # DNS
+    - protocol: UDP
+      port: 53     # DNS
+    - protocol: TCP
+      port: 443    # HTTPS
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
 ```
 
 ### Pod Lifecycle
@@ -1111,7 +1249,11 @@ terraform plan
 terraform output
 # Expected outputs:
 # - cluster_endpoint
+<<<<<<< HEAD
 # - cluster_id
+=======
+# - cluster_id
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
 # - ecr_repository_url
 # - ecr_registry_id
 # - node_group_id
@@ -1281,27 +1423,51 @@ chmod +x verify.sh
 
 ### Monthly Cost Estimate
 
-| Resource           | Type                  | Price           | Qty       | Monthly Cost |
+<<<<<<< HEAD
+| Resource | Type | Price | Qty | Monthly Cost |
 | ------------------ | --------------------- | --------------- | --------- | ------------ |
-| **EKS Cluster**    | Managed Kubernetes    | $0.10/hour      | 1         | $73.00       |
-| **EC2 t3.medium**  | On-demand instance    | $0.0416/hour    | 2         | $30.40       |
-| **ECR Repository** | Container registry    | $0.10/GB        | -         | < $1.00      |
-| **Data Transfer**  | Out of region         | $0.02/GB        | -         | < $1.00      |
-| **LoadBalancer**   | Network load balancer | $0.0257/hour    | 1         | ~$18.70      |
-| **Storage**        | EBS gp2 volumes       | ~$0.10/GB/month | ~10GB     | ~$1.00       |
-|                    |                       |                 | **TOTAL** | **~$124.10** |
+| **EKS Cluster** | Managed Kubernetes | $0.10/hour | 1 | $73.00 |
+| **EC2 t3.medium** | On-demand instance | $0.0416/hour | 2 | $30.40 |
+| **ECR Repository** | Container registry | $0.10/GB | - | < $1.00 |
+| **Data Transfer** | Out of region | $0.02/GB | - | < $1.00 |
+| **LoadBalancer** | Network load balancer | $0.0257/hour | 1 | ~$18.70 |
+| **Storage** | EBS gp2 volumes | ~$0.10/GB/month | ~10GB | ~$1.00 |
+| | | | **TOTAL** | **~$124.10** |
+=======
+| Resource | Type | Price | Qty | Monthly Cost |
+|----------|------|-------|-----|--------------|
+| **EKS Cluster** | Managed Kubernetes | $0.10/hour | 1 | $73.00 |
+| **EC2 t3.medium** | On-demand instance | $0.0416/hour | 2 | $30.40 |
+| **ECR Repository** | Container registry | $0.10/GB | - | < $1.00 |
+| **Data Transfer** | Out of region | $0.02/GB | - | < $1.00 |
+| **LoadBalancer** | Network load balancer | $0.0257/hour | 1 | ~$18.70 |
+| **Storage** | EBS gp2 volumes | ~$0.10/GB/month | ~10GB | ~$1.00 |
+| | | | **TOTAL** | **~$124.10** |
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 **Simplified Design Cost: ~$103-124/month**
 
 ### Cost Optimization Done
 
-| Optimization              | Savings        | Details                                  |
+<<<<<<< HEAD
+| Optimization | Savings | Details |
 | ------------------------- | -------------- | ---------------------------------------- |
-| No NAT Gateways           | $32.00/month   | Public subnets only (sufficient for dev) |
-| Minimal logging           | $2.00/month    | CloudWatch logs disabled                 |
-| Smaller node type         | $0.00 baseline | t3.medium vs t3.large                    |
-| Spot instances (optional) | 70% on compute | Not enabled by default                   |
-| **Total Savings**         | **$34+/month** | **~25% reduction possible with Spot**    |
+| No NAT Gateways | $32.00/month | Public subnets only (sufficient for dev) |
+| Minimal logging | $2.00/month | CloudWatch logs disabled |
+| Smaller node type | $0.00 baseline | t3.medium vs t3.large |
+| Spot instances (optional) | 70% on compute | Not enabled by default |
+| **Total Savings** | **$34+/month** | **~25% reduction possible with Spot** |
+=======
+| Optimization | Savings | Details |
+|--------------|---------|---------|
+| No NAT Gateways | $32.00/month | Public subnets only (sufficient for dev) |
+| Minimal logging | $2.00/month | CloudWatch logs disabled |
+| Smaller node type | $0.00 baseline | t3.medium vs t3.large |
+| Spot instances (optional) | 70% on compute | Not enabled by default |
+| **Total Savings** | **$34+/month** | **~25% reduction possible with Spot** |
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ### Cost Optimization Options
 
@@ -1365,13 +1531,24 @@ aws cloudwatch put-metric-alarm \
 
 ### Simplifications Made
 
-| Aspect            | Before                | After               | Reduction |
+<<<<<<< HEAD
+| Aspect | Before | After | Reduction |
 | ----------------- | --------------------- | ------------------- | --------- |
-| **Jenkinsfile**   | 250 lines (12 stages) | 80 lines (5 stages) | 68% ↓     |
-| **Terraform**     | 400+ lines            | 180 lines           | 55% ↓     |
-| **Total Code**    | 3500+ lines           | 600 lines           | 83% ↓     |
-| **Documentation** | 5 complex docs        | 1 complete doc      | 90% ↓     |
-| **Monthly Cost**  | ~$135                 | ~$103-124           | 24% ↓     |
+| **Jenkinsfile** | 250 lines (12 stages) | 80 lines (5 stages) | 68% ↓ |
+| **Terraform** | 400+ lines | 180 lines | 55% ↓ |
+| **Total Code** | 3500+ lines | 600 lines | 83% ↓ |
+| **Documentation** | 5 complex docs | 1 complete doc | 90% ↓ |
+| **Monthly Cost** | ~$135 | ~$103-124 | 24% ↓ |
+=======
+| Aspect | Before | After | Reduction |
+|--------|--------|-------|-----------|
+| **Jenkinsfile** | 250 lines (12 stages) | 80 lines (5 stages) | 68% ↓ |
+| **Terraform** | 400+ lines | 180 lines | 55% ↓ |
+| **Total Code** | 3500+ lines | 600 lines | 83% ↓ |
+| **Documentation** | 5 complex docs | 1 complete doc | 90% ↓ |
+| **Monthly Cost** | ~$135 | ~$103-124 | 24% ↓ |
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ### Key Decisions & Rationale
 
@@ -1385,6 +1562,11 @@ aws cloudwatch put-metric-alarm \
 #### 2. Simplified Jenkins Pipeline (68% smaller)
 
 **Before:** 12 stages with detailed logging, notifications, rollbacks
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```groovy
 // OLD: Overly complex
@@ -1399,6 +1581,11 @@ pipeline {
 ```
 
 **After:** 5 clear stages
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```groovy
 // NEW: Focused
@@ -1414,6 +1601,7 @@ pipeline {
 #### 3. Minimal Terraform (55% smaller)
 
 **Removed:**
+<<<<<<< HEAD
 
 - Advanced logging configurations
 - CloudWatch alarms
@@ -1511,6 +1699,106 @@ Despite simplifications, security is **NOT compromised**:
 
 **Error:**
 
+=======
+
+- Advanced logging configurations
+- CloudWatch alarms
+- Multiple VPC configurations
+- Complex security group rules
+- Detailed tags and metadata
+
+**Kept:**
+
+- Core infrastructure (VPC, EKS, ECR)
+- IAM roles and policies
+- Node group configuration
+
+#### 4. Single Documentation File
+
+**Before:** 5 separate docs
+
+- ARCHITECTURE.md (detailed design)
+- CI_CD_PIPELINE.md (Jenkins config)
+- MONITORING.md (CloudWatch setup)
+- DEPLOYMENT_CHECKLIST.md (pre-deployment)
+- DEPLOYMENT_WORKFLOW.md (step-by-step)
+
+**After:** 1 comprehensive README
+
+- Clear structure with table of contents
+- Step-by-step deployment process
+- Complete verification checklist
+- Inline code examples and explanations
+
+#### 5. Kubernetes Deployment Simplified
+
+**Removed:**
+
+- Ingress controller setup
+- Pod Disruption Budgets
+- Horizontal Pod Autoscaler
+- Multiple ConfigMaps/Secrets
+
+**Kept:**
+
+- Namespace isolation
+- 2-pod deployment for redundancy
+- LoadBalancer service
+- Health probes
+- Network policies
+- Resource limits
+
+### Performance Impact
+
+| Metric             | Before      | After      | Impact            |
+| ------------------ | ----------- | ---------- | ----------------- |
+| Deployment time    | 45-60 min   | 30-40 min  | **25% faster** ✅ |
+| Failure points     | 12 possible | 5 possible | **58% fewer** ✅  |
+| Maintenance effort | High        | Low        | **Easier** ✅     |
+| Troubleshooting    | Complex     | Simple     | **Faster** ✅     |
+| Code complexity    | High        | Low        | **Cleaner** ✅    |
+
+### Security Maintained
+
+Despite simplifications, security is **NOT compromised**:
+
+✅ **Container Security**
+
+- Non-root user in Docker
+- Read-only filesystems (where possible)
+- Resource limits enforced
+- No privileged containers
+
+✅ **Network Security**
+
+- Security groups restrict traffic
+- Network policies in Kubernetes
+- No direct internet for pods (except outbound)
+
+✅ **Access Control**
+
+- IAM roles with least privilege
+- Service accounts in Kubernetes
+- RBAC rules enforced
+
+✅ **Image Security**
+
+- ECR image scanning enabled
+- Private registry (not public)
+- Version tagging implemented
+
+---
+
+## Troubleshooting
+
+### Common Issues & Solutions
+
+#### 1. Terraform Apply Fails with "Authentication Error"
+
+**Error:**
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
+
 ```
 Error: error reading from source URI...
 Error: reading ECR authorization token
@@ -1519,7 +1807,16 @@ Error: reading ECR authorization token
 **Cause:** AWS credentials not configured or expired
 
 **Solution:**
+<<<<<<< HEAD
 
+````bash
+# Re-configure AWS credentials
+aws configure
+
+# Verify credentials
+aws sts get-caller-identity
+
+=======
 ```bash
 # Re-configure AWS credentials
 aws configure
@@ -1527,14 +1824,20 @@ aws configure
 # Verify credentials
 aws sts get-caller-identity
 
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
 # Re-run Terraform
 cd terraform
 terraform apply
-```
+````
 
 #### 2. EKS Cluster Stuck in "CREATING" for > 15 minutes
 
 **Error:**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```
 Error: EKS Cluster creation timeout
@@ -1543,7 +1846,21 @@ Error: EKS Cluster creation timeout
 **Cause:** CloudFormation stack creation slow (normal) or stuck
 
 **Solution:**
+<<<<<<< HEAD
 
+````bash
+# Check CloudFormation stack
+aws cloudformation list-stacks \
+  --query "StackSummaries[?StackName=='blogging-app-cluster']" \
+  --region us-east-1
+
+# Wait 20 minutes, then check again
+aws eks describe-cluster \
+  --name blogging-app-cluster \
+  --region us-east-1 \
+  --query 'cluster.status'
+
+=======
 ```bash
 # Check CloudFormation stack
 aws cloudformation list-stacks \
@@ -1556,15 +1873,21 @@ aws eks describe-cluster \
   --region us-east-1 \
   --query 'cluster.status'
 
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
 # If still stuck, destroy and retry
 cd terraform
 terraform destroy -auto-approve
 terraform apply
-```
+````
 
 #### 3. kubectl Cannot Connect to Cluster
 
 **Error:**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```
 The connection to the server localhost:8080 was refused
@@ -1573,6 +1896,11 @@ The connection to the server localhost:8080 was refused
 **Cause:** kubeconfig not configured or expired
 
 **Solution:**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```bash
 # Update kubeconfig
@@ -1590,6 +1918,11 @@ kubectl cluster-info
 #### 4. Pods Stuck in "Pending" State
 
 **Error:**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```
 NAME                          READY   STATUS    RESTARTS   AGE
@@ -1599,13 +1932,22 @@ blogging-app-xxxxx-xxxxx      0/1     Pending   0          5m
 **Cause:** Insufficient resources, node not ready, or image pull issue
 
 **Solution:**
+<<<<<<< HEAD
 
+````bash
+# Check pod details
+kubectl describe pod <pod-name> -n blogging-app
+
+# Look for: "Insufficient memory", "node not ready", "image pull backoff"
+
+=======
 ```bash
 # Check pod details
 kubectl describe pod <pod-name> -n blogging-app
 
 # Look for: "Insufficient memory", "node not ready", "image pull backoff"
 
+>>>>>>> 0ad6b4f861111440970408154b712b5d21551a3d
 # If node not ready:
 kubectl describe node <node-name>
 kubectl logs -n kube-system -l k8s-app=kubelet
@@ -1615,11 +1957,16 @@ kubectl describe pod <pod-name> -n blogging-app | grep -A 5 "Events"
 
 # Verify ECR repository and image
 aws ecr describe-images --repository-name blogging-app --region us-east-1
-```
+````
 
 #### 5. Docker Build Fails with "Permission Denied"
 
 **Error:**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```
 permission denied while trying to connect to Docker daemon
@@ -1628,6 +1975,11 @@ permission denied while trying to connect to Docker daemon
 **Cause:** Docker daemon not running or user permissions
 
 **Solution:**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```bash
 # Restart Docker
@@ -1646,6 +1998,11 @@ sudo usermod -aG docker $USER
 #### 6. Image Push to ECR Fails with "Unauthorized"
 
 **Error:**
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```
 denied: User is not authorized to perform ecr:GetDownloadUrlForLayer
@@ -1654,6 +2011,310 @@ denied: User is not authorized to perform ecr:GetDownloadUrlForLayer
 **Cause:** ECR authentication not done or credentials expired
 
 **Solution:**
+<<<<<<< HEAD
+
+```bash
+# Re-authenticate Docker
+aws ecr get-login-password --region us-east-1 \
+  | docker login --username AWS --password-stdin $ECR_URL
+
+# Verify login successful
+# Expected: "Login Succeeded"
+
+# Re-push image
+docker push $ECR_URL:latest
+```
+
+#### 7. LoadBalancer IP Never Assigned (Stuck on <pending>)
+
+**Error:**
+
+```
+NAME                   TYPE           CLUSTER-IP   EXTERNAL-IP   PORT(S)
+blogging-app-service   LoadBalancer   10.x.x.x     <pending>     80:30xxx/TCP
+```
+
+**Cause:** EKS service controller can't provision load balancer
+
+**Solution:**
+
+```bash
+# Check service status
+kubectl describe svc blogging-app-service -n blogging-app
+
+# Check for errors in Events section
+
+# Verify AWS load balancer service
+aws elbv2 describe-load-balancers \
+  --region us-east-1 | grep blogging-app
+
+# Check if stuck:
+# Wait 3-5 minutes (first time can be slow)
+
+# If still pending after 10 minutes:
+kubectl delete svc blogging-app-service -n blogging-app
+kubectl apply -f kubernetes/service.yaml
+```
+
+#### 8. Application Not Responding After Deployment
+
+**Error:**
+
+```
+curl: (7) Failed to connect to host port 80: Connection refused
+```
+
+**Cause:** App not started, port wrong, or security group blocking
+
+**Solution:**
+
+```bash
+# Check pod status
+kubectl get pods -n blogging-app
+# Should be "Running"
+
+# Check pod logs
+kubectl logs -n blogging-app -l app=blogging-app -f
+
+# Expected logs:
+# "Spring Boot Application Started"
+
+# Check readiness probe
+kubectl get pod <pod-name> -n blogging-app -o jsonpath='{.status.conditions[?(@.type=="Ready")]}'
+
+# Check if app is listening on port 8080 (inside pod)
+kubectl exec -it <pod-name> -n blogging-app -- curl localhost:8080
+
+# Check security groups
+aws ec2 describe-security-groups --region us-east-1 | grep blogging-app
+```
+
+#### 9. Out of Memory (OOM) Errors
+
+**Error:**
+
+```
+Pod: OOMKilled
+Pod: back-off restarting failed container
+```
+
+**Cause:** Memory limits too low for application
+
+**Solution:**
+
+```bash
+# Check current memory usage
+kubectl top pods -n blogging-app
+
+# Increase memory limit in deployment.yaml:
+# Change: memory: 512Mi
+# To:     memory: 1Gi
+
+# Apply changes
+kubectl apply -f kubernetes/deployment.yaml
+
+# Verify
+kubectl get pods -n blogging-app
+```
+
+#### 10. Terraform State Corruption
+
+**Error:**
+
+```
+Error: Inconsistent dependency graph: ...
+```
+
+**Cause:** State file corrupted or out of sync
+
+**Solution:**
+
+```bash
+# Backup state
+cp terraform.tfstate terraform.tfstate.backup
+
+# Refresh state
+terraform refresh
+
+# If still broken, reimport resources:
+# First, destroy (destructive!)
+terraform destroy
+
+# Then re-apply
+terraform apply
+```
+
+### Troubleshooting Commands Reference
+
+```bash
+# Terraform debugging
+terraform plan -verbose
+terraform apply -debug
+TF_LOG=DEBUG terraform apply
+
+# Kubernetes debugging
+kubectl get events -n blogging-app --sort-by='.lastTimestamp'
+kubectl logs -n blogging-app -l app=blogging-app -f
+kubectl describe pod <name> -n blogging-app
+kubectl exec -it <pod> -n blogging-app -- /bin/bash
+kubectl top pods -n blogging-app
+kubectl top nodes
+
+# AWS debugging
+aws eks describe-cluster --name blogging-app-cluster --region us-east-1
+aws eks describe-nodegroup --cluster-name blogging-app-cluster --nodegroup-name blogging-app-node-group --region us-east-1
+aws ecr describe-images --repository-name blogging-app --region us-east-1
+aws elbv2 describe-load-balancers --region us-east-1
+
+# Docker debugging
+docker build --no-cache -t blogging-app:latest .
+docker logs <container-id>
+docker inspect <container-id>
+```
+
+---
+
+## Cleanup
+
+### Destroy All Resources (Reverse Order)
+
+#### Step 1: Delete Kubernetes Resources
+
+```bash
+cd kubernetes
+
+# Delete all K8s resources
+kubectl delete -f .
+
+# Verify deletion
+kubectl get all -n blogging-app
+# Expected: No resources
+
+# Delete namespace
+kubectl delete namespace blogging-app
+```
+
+#### Step 2: Destroy Terraform Infrastructure
+
+```bash
+cd ../terraform
+
+# Review what will be destroyed
+terraform plan -destroy
+
+# Destroy all AWS resources
+terraform destroy
+
+# When prompted:
+# "Do you really want to destroy all resources?"
+# Type: yes
+
+# Expected resources destroyed:
+# - EKS Cluster (takes 5-10 minutes)
+# - Node Group
+# - VPC & Subnets
+# - Security Groups
+# - IAM Roles
+# - ECR Repository (and all images)
+# - Kubernetes Namespace (managed by Terraform)
+
+# Verify destruction
+terraform show
+# Should show no resources
+```
+
+#### Step 3: Clean Up Local Files
+
+```bash
+# Remove Terraform state
+rm terraform.tfstate*
+rm -rf .terraform/
+
+# Remove kubeconfig entry
+kubectl config delete-context blogging-app-cluster
+kubectl config delete-cluster blogging-app-cluster
+kubectl config unset users.aws
+
+# Remove Docker images (optional)
+docker rmi blogging-app:latest
+docker rmi <ecr_url>:latest
+```
+
+#### Step 4: Verify Complete Cleanup
+
+```bash
+# Check AWS resources
+aws eks list-clusters --region us-east-1
+# Should not show blogging-app-cluster
+
+aws ecr describe-repositories --region us-east-1
+# Should not show blogging-app
+
+aws ec2 describe-vpcs --region us-east-1 | grep blogging
+# Should not find any blogging VPCs
+
+# Check kubeconfig
+kubectl config get-contexts
+# blogging-app-cluster should not be listed
+
+# Check local disk
+ls -la terraform/terraform.tfstate*
+# Should not exist
+```
+
+### Cost Cleanup Checklist
+
+- [ ] EKS cluster deleted
+- [ ] EC2 instances terminated
+- [ ] LoadBalancer deleted (stops incurring charges)
+- [ ] ECR repository deleted
+- [ ] EBS volumes detached and deleted
+- [ ] NAT Gateways deleted (if any exist)
+- [ ] Data Transfer charges stopped
+- [ ] CloudWatch logs deleted (if any accumulated)
+
+**Estimated savings per month after cleanup: $103-124**
+
+---
+
+## Summary
+
+This is a **complete, production-ready DevOps pipeline** for a Spring Boot blogging application:
+
+### What You Have:
+
+1. ✅ **Spring Boot Application** - Full-featured blogging platform
+2. ✅ **Docker Container** - Multi-stage build for efficiency
+3. ✅ **Kubernetes Deployment** - High availability with 2 replicas
+4. ✅ **AWS EKS Cluster** - Managed Kubernetes service
+5. ✅ **Infrastructure as Code** - Terraform for reproducibility
+6. ✅ **CI/CD Pipeline** - Jenkins for automation
+7. ✅ **Container Registry** - ECR for image storage
+8. ✅ **Complete Documentation** - This guide covers everything
+
+### Deployment Timeline:
+
+- **Terraform Apply**: 15-20 minutes
+- **Docker Build & Push**: 10-15 minutes
+- **Kubernetes Deploy**: 5-10 minutes
+- **Total**: 30-40 minutes from start to production
+
+### Cost:
+
+- **Monthly**: ~$103-124 (development-optimized)
+- **Savings**: 24% cheaper than original design
+- **Further savings**: 70% more with Spot instances
+
+### Next Steps:
+
+1. Follow the Quick Start section above
+2. Use the Verification Checklist to confirm each step
+3. Refer to Troubleshooting for any issues
+4. Use Cleanup section when done
+
+---
+
+# **Project Ready for Deployment! 🚀**
 
 ```bash
 # Re-authenticate Docker
@@ -1957,3 +2618,5 @@ This is a **complete, production-ready DevOps pipeline** for a Spring Boot blogg
 ---
 
 **Project Ready for Deployment! 🚀**
+
+> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
