@@ -534,11 +534,8 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 ```
 
-<<<<<<< HEAD
 
 =======
-
-> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 - Resolves dependencies
 - Compiles Java code
@@ -550,7 +547,6 @@ RUN mvn clean package -DskipTests
 
 =======
 
-> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 ```dockerfile
 FROM openjdk:17-slim
@@ -563,7 +559,6 @@ ENTRYPOINT ["java", "-jar", "blogging-app.jar"]
 
 =======
 
-> > > > > > > 0ad6b4f861111440970408154b712b5d21551a3d
 
 - Creates lightweight runtime image
 - No build tools (Maven, compiler) included
