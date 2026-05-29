@@ -1,0 +1,54 @@
+---
+# Network Policy to restrict traffic to blogging-app pods
+# Default deny all ingress, allow only from ingress controller and internal traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: blogging-app
+  namespace: blogging-app
+spec:
+  podSelector:
+    matchLabels:
+      app: blogging-app
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from LoadBalancer service
+    - from:
+        - podSelector:
+            matchLabels:
+              app: blogging-app
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow from kube-proxy for health checks
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # Allow DNS queries
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow external HTTPS (if needed for external APIs)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow traffic within namespace (pod-to-pod)
+    - to:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
